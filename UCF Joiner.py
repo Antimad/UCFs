@@ -5,7 +5,7 @@ from openpyxl.styles import Border, Font, Side, Alignment
 from openpyxl.utils.dataframe import dataframe_to_rows
 from numpy import nan
 
-file = 'Report215.xlsx'
+file = 'Report225.xlsx'
 
 ExcelFile = pd.ExcelFile(file)
 wb = Workbook()
@@ -54,14 +54,18 @@ def conditional_formatting():
     Pink = 'FF00FF'
     Black = '000000'
     apply_format = 'A3:' + ws.dimensions.split(':')[1]
+
     O_Rule = FormulaRule(formula=['=$B3="O"'], font=Font(color=Blue))
     W_Rule = FormulaRule(formula=['=$B3="W"'], font=Font(color=Pink))
     R_Rule = FormulaRule(formula=['=$B3="R"'], font=Font(color=Black))
     N_Rule = FormulaRule(formula=['$B3="N"'], font=Font(color=Black))
+
     ws.conditional_formatting.add(apply_format, O_Rule)
     ws.conditional_formatting.add(apply_format, W_Rule)
     ws.conditional_formatting.add(apply_format, R_Rule)
     ws.conditional_formatting.add(apply_format, N_Rule)
+
+    ws.auto_filter.ref = ws.dimensions
 
 
 def labels():
@@ -71,8 +75,6 @@ def labels():
         cell.value = title
         cell.font = Font(size=15, bold=True)
         ws.column_dimensions[cell.column_letter].width = len(title) + 7
-
-    ws.append([])
 
 
 labels()
@@ -129,4 +131,5 @@ for x in range(len(AbvLocations)):
         pass
 
 conditional_formatting()
-wb.save('test.xlsx')
+
+wb.save('test225.xlsx')
