@@ -1,6 +1,6 @@
 import pandas as pd
 from openpyxl import Workbook
-from openpyxl.worksheet.dimensions import ColumnDimension
+from openpyxl.formatting.rule import FormulaRule
 from openpyxl.styles import Border, Font, Side, Alignment
 from openpyxl.utils.dataframe import dataframe_to_rows
 from numpy import nan
@@ -24,7 +24,8 @@ AbvLocations = ['ALE', 'ASH', 'AUS', 'BAT', 'BIR', 'BUC', 'CHA', 'CHAT', 'CHI', 
                 'PAR', 'PIT', 'PDX', 'RAL', 'SAN', 'SAV', 'TAM']
 
 
-class MoveOn(Exception): pass
+class MoveOn(Exception):
+    pass
 
 
 # Colors
@@ -38,14 +39,38 @@ TextWrap = Alignment(wrap_text=True, horizontal='center', vertical='bottom')
 TitleBorder = Border(top=Side(border_style='thin', color='000000'),
                      bottom=Side(border_style='thin', color='000000'))
 
+"""
+FormulaRule to be used. 
+
+O - On Order:       Blue Font   #0000FF
+W - On Water:       Pink Font   #FF00FF
+R - Received:       Black Font  #000000
+N - New Product:    Black Font  #000000
+"""
+
+
+def conditional_formatting():
+    Blue = '0000FF'
+    Pink = 'FF00FF'
+    Black = '000000'
+    apply_format = 'A3:' + ws.dimensions.split(':')[1]
+    O_Rule = FormulaRule(formula=['=$B3="O"'], font=Font(color=Blue))
+    W_Rule = FormulaRule(formula=['=$B3="W"'], font=Font(color=Pink))
+    R_Rule = FormulaRule(formula=['=$B3="R"'], font=Font(color=Black))
+    N_Rule = FormulaRule(formula=['$B3="N"'], font=Font(color=Black))
+    ws.conditional_formatting.add(apply_format, O_Rule)
+    ws.conditional_formatting.add(apply_format, W_Rule)
+    ws.conditional_formatting.add(apply_format, R_Rule)
+    ws.conditional_formatting.add(apply_format, N_Rule)
+
 
 def labels():
     for col_num, title in enumerate(POI):
         cell = ws.cell(row=1, column=col_num + 1)
 
         cell.value = title
-        cell.font = Font(size=15, color=RED)
-        ws.column_dimensions[cell.column_letter].width = len(title) + 5
+        cell.font = Font(size=15, bold=True)
+        ws.column_dimensions[cell.column_letter].width = len(title) + 7
 
     ws.append([])
 
@@ -57,7 +82,6 @@ def extractor(item, d_time=False, latest_shipment=False):
     edit = item
     if d_time:
         edit = pd.to_datetime(item, errors='coerce').date()
-
         if edit is pd.NaT:
             edit = ''
 
@@ -69,7 +93,6 @@ def extractor(item, d_time=False, latest_shipment=False):
             edit = str(edit.month) + '/' + str(edit.day)
 
     return edit
-
 
 
 def page_information(page):
@@ -105,4 +128,5 @@ for x in range(len(AbvLocations)):
     except MoveOn:
         pass
 
+conditional_formatting()
 wb.save('test.xlsx')
