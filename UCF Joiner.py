@@ -1,11 +1,72 @@
 import pandas as pd
+from sys import argv
+from os.path import dirname, basename
 from openpyxl import Workbook
 from openpyxl.formatting.rule import FormulaRule
 from openpyxl.styles import Border, Font, Side, Alignment
 from openpyxl.utils.dataframe import dataframe_to_rows
 from numpy import nan
+from PyQt5.QtWidgets import (QApplication, QFileDialog, QWidget, QPushButton, QGridLayout, QLabel)
+from PyQt5 import QtCore
 
-file = 'Report225.xlsx'
+
+FileLocations = {'File Name': [], 'Location': []}
+
+
+class FileSelector(QWidget):
+    def __init__(self):
+        # noinspection PyArgumentList
+        super(FileSelector, self).__init__()
+        self.title = 'Purchase Order File'
+        self.left = 900
+        self.top = 500
+        self.width = 520
+        self.height = 200
+        self.greeting()
+
+    def greeting(self):
+        self.setGeometry(self.left, self.top, self.width, self.height)
+        self.setWindowTitle(self.title)
+        grid_layout = QGridLayout()
+
+        hello = QLabel('Please select a file', self)
+        hello.setAlignment(QtCore.Qt.AlignCenter)
+        hello.move(QtCore.Qt.AlignCenter-25, 50)
+        hello.setStyleSheet('font-size:18pt; font-weight:600')
+        grid_layout.addWidget(hello)
+
+        btn = QPushButton('Search', self)
+        btn.clicked.connect(self.search_file)
+        btn.move(QtCore.Qt.AlignCenter+100, 150)
+        btn.setStyleSheet('font-size:10pt')
+        grid_layout.addWidget(btn)
+        # noinspection PyTypeChecker
+        btn.clicked.connect(self.close)
+
+    def search_file(self):
+        options = QFileDialog.Options()
+        # noinspection PyCallByClass
+        find_file, _ = QFileDialog.getOpenFileName(self, 'UCF Source File', '',
+                                                   'Excel Files (*.xlsx *xls)',
+                                                   options=options)
+        FileLocations['Location'].append(find_file)
+
+
+if __name__ == '__main__':
+    app = QApplication(argv)
+    app.setStyle('Fusion')
+    window = FileSelector()
+    window.show()
+    app.exec_()
+
+File = FileLocations['Location'][0]
+
+full_path = dirname(File) + '/'
+
+OriginalName = basename(File).split('.')[0]
+
+
+file = File
 
 ExcelFile = pd.ExcelFile(file)
 wb = Workbook()
@@ -132,4 +193,4 @@ for x in range(len(AbvLocations)):
 
 conditional_formatting()
 
-wb.save('test225.xlsx')
+wb.save(full_path + str(OriginalName) + ' - UCF.xlsx')
