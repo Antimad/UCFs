@@ -37,7 +37,7 @@ class FileSelector(QWidget):
 
         btn = QPushButton('Search', self)
         btn.clicked.connect(self.search_file)
-        btn.move(QtCore.Qt.AlignCenter+100, 150)
+        btn.move(QtCore.Qt.AlignCenter+50, 150)
         btn.setStyleSheet('font-size:10pt')
         grid_layout.addWidget(btn)
         # noinspection PyTypeChecker
@@ -76,9 +76,9 @@ Since there are multiple sheets, I felt it was best to just read the entire work
 Puts the slowest part of the program at the start
 """
 
-POI = ['Store', 'Status', 'Supplier#', 'ETA', 'Container Received', 'Port of Discharge', 'ETA to US Port',
-       'Supplier Stuffing',
-       'ETD Origin Port', 'ETD Mother Vessel', 'Planned ETA to Port of discharge', 'ETA to Door']
+POI = ['Store', 'Status', 'Supplier#', 'Supplier Stuffing', 'ETD Mother Vessel', 'ETD Origin Port',
+       'Planned ETA to Port of discharge', 'ETA to US Port', 'ETA to Door', 'Container Received', 'ETA',
+       'Port of Discharge']
 
 AbvLocations = ['ALE', 'ASH', 'AUS', 'BAT', 'BIR', 'BUC', 'CHA', 'CHAT', 'CHI', 'CIN', 'COL', 'DAL', 'DET', 'HOU',
                 'HUN', 'IND', 'KAN', 'KNO', 'LA', 'LR', 'MAR', 'MEM', 'MIA', 'MIN', 'MTP', 'NAS', 'NOLA', 'ORL',
@@ -134,8 +134,9 @@ def labels():
         cell = ws.cell(row=1, column=col_num + 1)
 
         cell.value = title
-        cell.font = Font(size=15, bold=True)
+        cell.font = Font(size=10, bold=True)
         ws.column_dimensions[cell.column_letter].width = len(title) + 7
+        cell.alignment = TextWrap
 
 
 labels()
