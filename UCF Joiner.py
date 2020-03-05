@@ -8,7 +8,9 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from numpy import nan
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QWidget, QPushButton, QGridLayout, QLabel)
 from PyQt5 import QtCore
+from datetime import datetime
 
+day = datetime.now().strftime('%d-%m-%y')
 
 FileLocations = {'File Name': [], 'Location': []}
 
@@ -173,16 +175,31 @@ def page_information(page):
     updated_book = book_page[POI].copy()
     updated_book.fillna('', inplace=True)
     updated_book.rename_axis(None, inplace=True)
-
+    """
+    There are two types of requested date formats, one where only the month and day are requested, MD, and the other
+    would have the full date printed, YMD.
+    
+    MD:     The last date is to be printed where sometimes the multiple dates are place in one cell
+            separated by a comma, or sometimes only a space. 
+        
+    YMD:    These columns only contain a single datetime reference, but are usually accompanied by the time,
+            the time must then be removed as requested by the user.
+            
+    Columns names that are in the two categories:
+    
+    MD:     ETD Origin Port [5], ETD Mother Vessel [4], Planned ETA Port of discharge [6]
+    
+    YMD:    Container Received [9], ETA to US Port [7], Supplier Stuffing [3], ETA to Door [8]
+    """
     for row_addition in dataframe_to_rows(updated_book, index=False, header=False):
-        row_addition[4] = extractor(item=row_addition[4], d_time=True)
-        row_addition[6] = extractor(item=row_addition[6], d_time=True)
+        row_addition[3] = extractor(item=row_addition[3], d_time=True)
         row_addition[7] = extractor(item=row_addition[7], d_time=True)
-        row_addition[11] = extractor(item=row_addition[11], d_time=True)
+        row_addition[8] = extractor(item=row_addition[8], d_time=True)
+        row_addition[9] = extractor(item=row_addition[9], d_time=True)
 
-        row_addition[8] = extractor(item=row_addition[8], latest_shipment=True)
-        row_addition[9] = extractor(item=row_addition[9], latest_shipment=True)
-        row_addition[10] = extractor(item=row_addition[10], latest_shipment=True)
+        row_addition[5] = extractor(item=row_addition[5], latest_shipment=True)
+        row_addition[4] = extractor(item=row_addition[4], latest_shipment=True)
+        row_addition[6] = extractor(item=row_addition[6], latest_shipment=True)
         ws.append(row_addition)
 
 
@@ -194,4 +211,4 @@ for x in range(len(AbvLocations)):
 
 conditional_formatting()
 
-wb.save(full_path + str(OriginalName) + ' - UCF.xlsx')
+wb.save(full_path + str(OriginalName) + ' UCF ' + str(day) + '.xlsx')
