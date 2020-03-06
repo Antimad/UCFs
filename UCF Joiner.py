@@ -79,7 +79,7 @@ Puts the slowest part of the program at the start
 """
 
 POI = ['Store', 'Status', 'Supplier#', 'Supplier Stuffing', 'ETD Mother Vessel', 'ETD Origin Port',
-       'Planned ETA to Port of discharge', 'ETA to US Port', 'ETA to Door', 'Container Received', 'ETA',
+       'Planned ETA to Port of discharge', 'ETA to US Port', 'ETA to Door', 'Container Received', 'ETA', 'Ship Line',
        'Port of Discharge']
 
 AbvLocations = ['ALE', 'ASH', 'AUS', 'BAT', 'BIR', 'BUC', 'CHA', 'CHAT', 'CHI', 'CIN', 'COL', 'DAL', 'DET', 'HOU',
