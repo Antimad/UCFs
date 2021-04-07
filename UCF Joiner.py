@@ -112,20 +112,20 @@ N - New Product:    Black Font  #000000
 
 
 def conditional_formatting():
-    Blue = '0000FF'
-    Pink = 'FF00FF'
-    Black = '000000'
+    blue = '0000FF'
+    pink = 'FF00FF'
+    black = '000000'
     apply_format = 'A3:' + ws.dimensions.split(':')[1]
 
-    O_Rule = FormulaRule(formula=['=$J3="O"'], font=Font(color=Blue))
-    W_Rule = FormulaRule(formula=['=$J3="W"'], font=Font(color=Pink))
-    R_Rule = FormulaRule(formula=['=$J3="R"'], font=Font(color=Black))
-    N_Rule = FormulaRule(formula=['$J3="N"'], font=Font(color=Black))
+    o_rule = FormulaRule(formula=['=$J3="O"'], font=Font(color=blue))
+    w_rule = FormulaRule(formula=['=$J3="W"'], font=Font(color=pink))
+    r_rule = FormulaRule(formula=['=$J3="R"'], font=Font(color=black))
+    n_rule = FormulaRule(formula=['$J3="N"'], font=Font(color=black))
 
-    ws.conditional_formatting.add(apply_format, O_Rule)
-    ws.conditional_formatting.add(apply_format, W_Rule)
-    ws.conditional_formatting.add(apply_format, R_Rule)
-    ws.conditional_formatting.add(apply_format, N_Rule)
+    ws.conditional_formatting.add(apply_format, o_rule)
+    ws.conditional_formatting.add(apply_format, w_rule)
+    ws.conditional_formatting.add(apply_format, r_rule)
+    ws.conditional_formatting.add(apply_format, n_rule)
 
     ws.auto_filter.ref = ws.dimensions
 
@@ -165,13 +165,13 @@ def page_information(page):
     if ExcelFile.sheet_names[page] not in AbvLocations:
         raise MoveOn
 
-    Store = ExcelFile.parse(sheet_name=page).columns[0]
+    store = ExcelFile.parse(sheet_name=page).columns[0]
     book_page = ExcelFile.parse(sheet_name=page, skiprows=2)
     book_page.rename(columns={'Unnamed: 0': 'Status'}, inplace=True)
     book_page.columns = book_page.columns.str.rstrip()
     book_page.replace(r'^\s*$', nan, regex=True, inplace=True)
     book_page.dropna(how='all', inplace=True)
-    book_page['Store'] = Store
+    book_page['Store'] = store
     updated_book = book_page[POI].copy()
     updated_book.fillna('', inplace=True)
     updated_book.rename_axis(None, inplace=True)
