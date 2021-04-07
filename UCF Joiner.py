@@ -8,9 +8,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from numpy import nan
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QWidget, QPushButton, QGridLayout, QLabel)
 from PyQt5 import QtCore
-from datetime import datetime
 
-day = datetime.now().strftime('%d-%m-%y')
 
 FileLocations = {'File Name': [], 'Location': []}
 
@@ -39,7 +37,7 @@ class FileSelector(QWidget):
 
         btn = QPushButton('Search', self)
         btn.clicked.connect(self.search_file)
-        btn.move(QtCore.Qt.AlignCenter+50, 150)
+        btn.move(QtCore.Qt.AlignCenter+100, 150)
         btn.setStyleSheet('font-size:10pt')
         grid_layout.addWidget(btn)
         # noinspection PyTypeChecker
@@ -78,13 +76,14 @@ Since there are multiple sheets, I felt it was best to just read the entire work
 Puts the slowest part of the program at the start
 """
 
-POI = ['Store', 'Status', 'Supplier#', 'Supplier Stuffing', 'ETD Mother Vessel', 'ETD Origin Port',
-       'Planned ETA to Port of discharge', 'ETA to US Port', 'ETA to Door', 'Container Received', 'ETA', 'Ship Line',
+
+POI = ['Supplier#', 'Supplier Stuffing', 'ETD Mother Vessel', 'ETD Origin Port', 'Planned ETA to Port of discharge',
+       'ETA to US Port', 'ETA to Door', 'Container Received', 'Store', 'Status', 'ETA', 'Ship Line',
        'Port of Discharge']
 
-AbvLocations = ['ALE', 'ASH', 'AUS', 'BAT', 'BIR', 'BUC', 'CHA', 'CHAT', 'CHI', 'CIN', 'COL', 'DAL', 'DET', 'HOU',
-                'HUN', 'IND', 'KAN', 'KNO', 'LA', 'LR', 'MAR', 'MEM', 'MIA', 'MIN', 'MTP', 'NAS', 'NOLA', 'ORL',
-                'PAR', 'PIT', 'PDX', 'RAL', 'SAN', 'SAV', 'TAM']
+AbvLocations = ['ALE', 'ASH', 'AUS', 'BAT', 'BOS', 'BIR', 'BUC', 'CHA', 'CHAT', 'CHI', 'CIN', 'COL', 'DAL', 'DET',
+                'HOU', 'HUN', 'IND', 'KAN', 'KNO', 'LA', 'LR', 'MAR', 'MEM', 'MIA', 'MIN', 'MTP', 'NAS', 'NOLA', 'ORL',
+                'PAR', 'PIT', 'PDX', 'RAL', 'SAN', 'SAV', 'TAM', 'GRN']
 
 
 class MoveOn(Exception):
@@ -118,10 +117,10 @@ def conditional_formatting():
     Black = '000000'
     apply_format = 'A3:' + ws.dimensions.split(':')[1]
 
-    O_Rule = FormulaRule(formula=['=$B3="O"'], font=Font(color=Blue))
-    W_Rule = FormulaRule(formula=['=$B3="W"'], font=Font(color=Pink))
-    R_Rule = FormulaRule(formula=['=$B3="R"'], font=Font(color=Black))
-    N_Rule = FormulaRule(formula=['$B3="N"'], font=Font(color=Black))
+    O_Rule = FormulaRule(formula=['=$J3="O"'], font=Font(color=Blue))
+    W_Rule = FormulaRule(formula=['=$J3="W"'], font=Font(color=Pink))
+    R_Rule = FormulaRule(formula=['=$J3="R"'], font=Font(color=Black))
+    N_Rule = FormulaRule(formula=['$J3="N"'], font=Font(color=Black))
 
     ws.conditional_formatting.add(apply_format, O_Rule)
     ws.conditional_formatting.add(apply_format, W_Rule)
@@ -138,7 +137,6 @@ def labels():
         cell.value = title
         cell.font = Font(size=10, bold=True)
         ws.column_dimensions[cell.column_letter].width = len(title) + 7
-        cell.alignment = TextWrap
 
 
 labels()
@@ -162,6 +160,8 @@ def extractor(item, d_time=False, latest_shipment=False):
 
 
 def page_information(page):
+    if page >= len(ExcelFile.sheet_names):
+        return
     if ExcelFile.sheet_names[page] not in AbvLocations:
         raise MoveOn
 
@@ -175,31 +175,18 @@ def page_information(page):
     updated_book = book_page[POI].copy()
     updated_book.fillna('', inplace=True)
     updated_book.rename_axis(None, inplace=True)
-    """
-    There are two types of requested date formats, one where only the month and day are requested, MD, and the other
-    would have the full date printed, YMD.
-    
-    MD:     The last date is to be printed where sometimes the multiple dates are place in one cell
-            separated by a comma, or sometimes only a space. 
-        
-    YMD:    These columns only contain a single datetime reference, but are usually accompanied by the time,
-            the time must then be removed as requested by the user.
-            
-    Columns names that are in the two categories:
-    
-    MD:     ETD Origin Port [5], ETD Mother Vessel [4], Planned ETA Port of discharge [6]
-    
-    YMD:    Container Received [9], ETA to US Port [7], Supplier Stuffing [3], ETA to Door [8]
-    """
-    for row_addition in dataframe_to_rows(updated_book, index=False, header=False):
-        row_addition[3] = extractor(item=row_addition[3], d_time=True)
-        row_addition[7] = extractor(item=row_addition[7], d_time=True)
-        row_addition[8] = extractor(item=row_addition[8], d_time=True)
-        row_addition[9] = extractor(item=row_addition[9], d_time=True)
 
-        row_addition[5] = extractor(item=row_addition[5], latest_shipment=True)
+    for row_addition in dataframe_to_rows(updated_book, index=False, header=False):
+        row_addition[6] = extractor(item=row_addition[6], d_time=True)
+        row_addition[7] = extractor(item=row_addition[7], d_time=True)
+        row_addition[5] = extractor(item=row_addition[5], d_time=True)
+        row_addition[1] = extractor(item=row_addition[1], d_time=True)
+
+        row_addition[10] = extractor(item=row_addition[10], latest_shipment=True)  # ETA
         row_addition[4] = extractor(item=row_addition[4], latest_shipment=True)
-        row_addition[6] = extractor(item=row_addition[6], latest_shipment=True)
+        row_addition[8] = extractor(item=row_addition[8])
+        row_addition[3] = extractor(item=row_addition[3], latest_shipment=True)
+        row_addition[2] = extractor(item=row_addition[2], latest_shipment=True)
         ws.append(row_addition)
 
 
@@ -211,4 +198,4 @@ for x in range(len(AbvLocations)):
 
 conditional_formatting()
 
-wb.save(full_path + str(OriginalName) + ' UCF ' + str(day) + '.xlsx')
+wb.save(full_path + str(OriginalName) + ' - UCF.xlsx')
